@@ -4,7 +4,9 @@ const maoJogadorDiv = document.getElementById("mao-jogador");
 
 let maoJogador = [];
 let pecas = [];
-let maoComputador = [];
+let maoComputador1 = [];
+let maoComputador2 = [];
+let maoComputador3 = [];
 let extremidadeEsquerda = null;
 let extremidadeDireita = null;
 let pecaSelecionada = null;
@@ -71,7 +73,9 @@ function distribuirPecas() {
 
   for (let i = 0; i < 7; i++) {
     maoJogador.push(pecas.pop());
-    maoComputador.push(pecas.pop());
+    maoComputador1.push(pecas.pop());
+    maoComputador2.push(pecas.pop());
+    maoComputador3.push(pecas.pop());
   }
 }
 
@@ -152,6 +156,30 @@ function jogarSelecionada(lado) {
 // =============================
 // 5️⃣ Iniciar jogo
 // =============================
+
+function criarPecaVerso() {
+  const peca = document.createElement("div");
+  peca.classList.add("peca");
+
+  // remove qualquer conteúdo interno
+  peca.innerHTML = "";
+
+  return peca;
+}
+
+function renderizarMaoVerso(id, quantidade) {
+  const mao = document.getElementById(id);
+  mao.innerHTML = "";
+
+  for (let i = 0; i < quantidade; i++) {
+    const peca = criarPecaVerso();
+    mao.appendChild(peca);
+  }
+}
+
+renderizarMaoVerso("mao-esquerda", 7);
+renderizarMaoVerso("mao-direita", 7);
+renderizarMaoVerso("mao-parceiro", 7);
 
 
 function renderizarMao() {

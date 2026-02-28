@@ -7,20 +7,45 @@
 </head>
 <body>
 
-  <h1>Dominó</h1>
+  <div class="container-jogo">
 
-  <div class="mesa" id="mesa">
+    <h1>Dominó</h1>
 
-  <div id="marcador-esquerda" class="marcador"></div>
+    <!-- Parceiro (na sua frente) -->
+    <div class="area-parceiro">
+      <h2>Parceiro</h2>
+      <div class="mao parceiro" id="mao-parceiro"></div>
+    </div>
 
-  <div id="area-mesa"></div>
+    <!-- Linha central (adversário esquerda + mesa + adversário direita) -->
+    <div class="linha-central">
 
-  <div id="marcador-direita" class="marcador"></div>
+      <div class="area-adversario esquerda">
+        <h2>Adversário</h2>
+        <div class="mao adversario" id="mao-esquerda"></div>
+      </div>
 
-</div>
+      <!-- SUA MESA (intocada) -->
+      <div class="mesa" id="mesa">
+        <div id="marcador-esquerda" class="marcador"></div>
+        <div id="area-mesa"></div>
+        <div id="marcador-direita" class="marcador"></div>
+      </div>
 
-  <h2>Sua mão</h2>
-  <div class="mao jogador" id="mao-jogador"></div>
+      <div class="area-adversario direita">
+        <h2>Adversário</h2>
+        <div class="mao adversario" id="mao-direita"></div>
+      </div>
+
+    </div>
+
+    <!-- SUA ÁREA (intocada) -->
+    <div class="area-jogador">
+      <h2>Sua mão</h2>
+      <div class="mao jogador" id="mao-jogador"></div>
+    </div>
+
+  </div>
 
   <script src="script.js"></script>
 </body>

@@ -1,24 +1,76 @@
+html, body {
+  min-height: 100vh;
+  margin: 0;
+}
+
+h1 {
+  margin-top: 30px;
+}
+
 body {
   background-color: #1e1e1e;
   color: white;
   font-family: Arial, sans-serif;
   text-align: center;
+
+  display: flex;
+  flex-direction: column;
+
+  padding-bottom: 20px;
 }
 
-.mesa {
-  min-height: 60px;
+.container-jogo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.mesa {   
+  width: 1200px;
+  height: 600px;
   border: 2px dashed white;
-  margin: 20px;
   padding: 10px;
 
   display: flex;
-  justify-content: center;  /* 👈 volta isso */
+  justify-content: center;
   align-items: center;
+}
+
+.linha-central {
+  flex: 1;                 /* ocupa espaço central */
+  display: flex;
+  justify-content: center; /* centraliza a mesa */
+  align-items: center;
+  gap: 40px;               /* espaço entre mesa e adversários */
 }
 
 #area-mesa {
   display: flex;
   align-items: center;
+}
+
+.area-jogador {
+  padding-bottom: 70px;
+}
+
+.area-parceiro {
+  margin-top: 10px;
+}
+
+.area-parceiro .mao {
+  justify-content: center;
+}
+
+.area-adversario {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.area-adversario .mao {
+  flex-direction: column;
+  gap: 10px;
 }
 
 .mao {
@@ -27,6 +79,7 @@ body {
   gap: 10px;
   margin-top: 20px;
 }
+
 
 .peca {
   width: 80px;
