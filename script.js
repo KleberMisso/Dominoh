@@ -1,4 +1,5 @@
 const mesa = document.getElementById("mesa");
+const areaMesa = document.getElementById("area-mesa");
 const maoJogadorDiv = document.getElementById("mao-jogador");
 
 let maoJogador = [];
@@ -6,6 +7,11 @@ let pecas = [];
 let maoComputador = [];
 let extremidadeEsquerda = null;
 let extremidadeDireita = null;
+let pecaSelecionada = null;
+let indexSelecionado = null;
+
+const marcadorEsquerda = document.getElementById("marcador-esquerda");
+const marcadorDireita = document.getElementById("marcador-direita");
 
 // =============================
 // 1️⃣ Criar todas as peças (0-0 até 6-6)
@@ -70,53 +76,77 @@ function distribuirPecas() {
 }
 
 
-// =============================
-// Placeholder da função jogar
-// (vamos implementar na próxima etapa)
-// =============================
 function jogarPeca(index) {
   const peca = maoJogador[index];
 
-  // Primeira validação
-  if (
-    peca.a !== extremidadeEsquerda &&
-    peca.b !== extremidadeEsquerda &&
-    peca.a !== extremidadeDireita &&
-    peca.b !== extremidadeDireita
-  ) {
+  const combinaEsquerda =
+    peca.a === extremidadeEsquerda ||
+    peca.b === extremidadeEsquerda;
+
+  const combinaDireita =
+    peca.a === extremidadeDireita ||
+    peca.b === extremidadeDireita;
+
+  if (!combinaEsquerda && !combinaDireita) {
     console.log("Peça inválida");
     return;
   }
 
-  // Verificar se encaixa na esquerda
-  if (peca.b === extremidadeEsquerda) {
-    extremidadeEsquerda = peca.a;
-    adicionarNaEsquerda(peca);
-  } else if (peca.a === extremidadeEsquerda) {
-    extremidadeEsquerda = peca.b;
-    inverterPeca(peca);
+  // Guarda peça selecionada
+  pecaSelecionada = peca;
+  indexSelecionado = index;
+
+  // Mostra marcadores válidos
+  if (combinaEsquerda) {
+    marcadorEsquerda.style.display = "block";
+  }
+
+  if (combinaDireita) {
+    marcadorDireita.style.display = "block";
+  }
+}
+
+function jogarSelecionada(lado) {
+  if (!pecaSelecionada) return;
+
+  const peca = pecaSelecionada;
+  const index = indexSelecionado;
+
+  if (lado === "esquerda") {
+    if (peca.b === extremidadeEsquerda) {
+      extremidadeEsquerda = peca.a;
+    } else {
+      inverterPeca(peca);
+      extremidadeEsquerda = peca.a;
+    }
+
     adicionarNaEsquerda(peca);
   }
 
-  // Verificar se encaixa na direita
-  else if (peca.a === extremidadeDireita) {
-    extremidadeDireita = peca.b;
-    adicionarNaDireita(peca);
-  } else if (peca.b === extremidadeDireita) {
-    extremidadeDireita = peca.a;
-    inverterPeca(peca);
+  if (lado === "direita") {
+    if (peca.a === extremidadeDireita) {
+      extremidadeDireita = peca.b;
+    } else {
+      inverterPeca(peca);
+      extremidadeDireita = peca.b;
+    }
+
     adicionarNaDireita(peca);
   }
 
   // Remove da mão
- maoJogador.splice(index, 1);
+  maoJogador.splice(index, 1);
+  renderizarMao();
 
-// Atualiza visual da mão
-renderizarMao();
+  // Limpa seleção
+  pecaSelecionada = null;
+  indexSelecionado = null;
 
-console.log("Esquerda:", extremidadeEsquerda);
-console.log("Direita:", extremidadeDireita);
+  marcadorEsquerda.style.display = "none";
+  marcadorDireita.style.display = "none";
 
+  console.log("Esquerda:", extremidadeEsquerda);
+  console.log("Direita:", extremidadeDireita);
 }
 
 // =============================
@@ -148,7 +178,7 @@ function colocarPrimeiraPeca() {
 
 function renderizarMesa(peca) {
   const div = criarDivPeca(peca);
-  mesa.appendChild(div);
+  areaMesa.appendChild(div);
 }
 
 function iniciarJogo() {
@@ -165,12 +195,12 @@ function iniciarJogo() {
 
 function adicionarNaDireita(peca) {
   const div = criarDivPeca(peca);
-  mesa.appendChild(div);
+  areaMesa.appendChild(div);
 }
 
 function adicionarNaEsquerda(peca) {
   const div = criarDivPeca(peca);
-  mesa.prepend(div);
+  areaMesa.prepend(div);
 }
 
 function inverterPeca(peca) {
@@ -190,5 +220,12 @@ function criarDivPeca(peca) {
   return div;
 }
 
+marcadorEsquerda.addEventListener("click", () => {
+  jogarSelecionada("esquerda");
+});
+
+marcadorDireita.addEventListener("click", () => {
+  jogarSelecionada("direita");
+});
 
 iniciarJogo();

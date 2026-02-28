@@ -10,10 +10,15 @@ body {
   border: 2px dashed white;
   margin: 20px;
   padding: 10px;
+
   display: flex;
-  justify-content: center;
+  justify-content: center;  /* 👈 volta isso */
   align-items: center;
-  gap: 0; /* 👈 tira espaço entre peças */
+}
+
+#area-mesa {
+  display: flex;
+  align-items: center;
 }
 
 .mao {
@@ -64,4 +69,12 @@ body {
   background-color: black;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.marcador {
+  width: 60px; /* mesmo tamanho da peça */
+  height: 30px;
+  border: 2px dashed yellow;
+  display: none;
+  cursor: pointer;
 }
