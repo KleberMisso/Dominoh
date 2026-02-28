@@ -1,0 +1,67 @@
+body {
+  background-color: #1e1e1e;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.mesa {
+  min-height: 60px;
+  border: 2px dashed white;
+  margin: 20px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0; /* 👈 tira espaço entre peças */
+}
+
+.mao {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.peca {
+  width: 80px;
+  height: 25px;
+  background-color: white;
+  color: black;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  font-weight: bold;
+  border: 2px solid black;
+  position: relative;
+}
+
+.metade {
+  width: 50%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  align-items: center;
+  justify-items: center;
+}
+
+.ponto {
+  width: 8px;
+  height: 8px;
+  background-color: black;
+  border-radius: 50%;
+}
+
+.peca::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  background-color: black;
+  left: 50%;
+  transform: translateX(-50%);
+}
