@@ -7,6 +7,10 @@
 </head>
 <body>
 
+    <button id="toggle-visao" class="btn-toggle">
+        Mostrar
+    </button>
+
   <div class="container-jogo">
 
     <h1>Dominó</h1>
@@ -14,6 +18,7 @@
     <!-- Parceiro (na sua frente) -->
     <div class="area-parceiro">
       <h2>Parceiro</h2>
+      <div class="status" id="status-parceiro"></div>
       <div class="mao parceiro" id="mao-parceiro"></div>
     </div>
 
@@ -22,6 +27,7 @@
 
       <div class="area-adversario esquerda">
         <h2>Adversário</h2>
+        <div class="status" id="status-comp1"></div>
         <div class="mao adversario" id="mao-esquerda"></div>
       </div>
 
@@ -34,6 +40,7 @@
 
       <div class="area-adversario direita">
         <h2>Adversário</h2>
+        <div class="status" id="status-comp3"></div>
         <div class="mao adversario" id="mao-direita"></div>
       </div>
 
@@ -42,6 +49,7 @@
     <!-- SUA ÁREA (intocada) -->
     <div class="area-jogador">
       <h2>Sua mão</h2>
+      <div class="status" id="status-jogador"></div>
       <div class="mao jogador" id="mao-jogador"></div>
     </div>
 
