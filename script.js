@@ -118,6 +118,15 @@ function distribuirPecas() {
   }
 }
 
+function jogadorTemJogada() {
+  return maoJogador.some(peca => 
+    peca.a === extremidadeEsquerda ||
+    peca.b === extremidadeEsquerda ||
+    peca.a === extremidadeDireita ||
+    peca.b === extremidadeDireita
+  );
+}
+
 
 function jogarPeca(index) {
   const peca = maoJogador[index];
@@ -164,6 +173,7 @@ function jogarSelecionada(lado) {
     }
 
     adicionarNaEsquerda(peca);
+    proximoTurno();
   }
 
   if (lado === "direita") {
@@ -175,6 +185,7 @@ function jogarSelecionada(lado) {
     }
 
     adicionarNaDireita(peca);
+    proximoTurno();
   }
 
   // Remove da mão
@@ -356,13 +367,25 @@ marcadorEsquerda.addEventListener("click", () => {
 marcadorDireita.addEventListener("click", () => {
   jogarSelecionada("direita");
 
-  proximoTurno();
+  
 });
 
 function executarTurno() {
   const atual = jogadorAtual();
 
-  if (atual === "jogador") {
+ if (atual === "jogador") {
+
+  if (!jogadorTemJogada()) {
+    console.log("Jogador passou a vez.");
+    mostrarPassou("jogador");
+
+    setTimeout(() => {
+      proximoTurno();
+    }, 800);
+
+    return;
+  }
+
     return; // espera clique
   }
 
