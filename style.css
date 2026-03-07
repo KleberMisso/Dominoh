@@ -60,8 +60,9 @@ body {
 }
 
 #area-mesa {
-  display: flex;
-  align-items: center;
+  position: relative;
+  width: 1000px;
+  height: 450px;
 }
 
 .area-jogador {

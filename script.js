@@ -19,6 +19,24 @@ const marcadorDireita = document.getElementById("marcador-direita");
 
 let mostrarPecas = false;
 
+let centroX = 500;
+let centroY = 220;
+
+let posDireitaX = centroX;
+let posDireitaY = centroY;
+
+let posEsquerdaX = centroX;
+let posEsquerdaY = centroY;
+
+let direcaoDireita = "direita";
+let direcaoEsquerda = "esquerda";
+
+let primeiraDireita = true;
+let primeiraEsquerda = true;
+
+const passo = 48;
+const passoDuplo = 24;
+
 function renderizarMaoReal(id, mao) {
   const container = document.getElementById(id);
   container.innerHTML = "";
@@ -314,6 +332,11 @@ function encontrarMaiorDuplo() {
 
 function renderizarMesa(peca) {
   const div = criarDivPeca(peca);
+
+  div.style.position = "absolute";
+  div.style.left = centroX + "px";
+  div.style.top = centroY + "px";
+
   areaMesa.appendChild(div);
 }
 
@@ -330,13 +353,91 @@ function iniciarJogo() {
 }
 
 function adicionarNaDireita(peca) {
+
+  if (primeiraDireita) {
+  posDireitaX += 0;
+  primeiraDireita = false;
+  } else {
+  posDireitaX += (peca.a === peca.b ? passoDuplo : passo);
+  }
+
+  if (direcaoDireita === "direita") {
+    posDireitaX += (peca.a === peca.b ? passoDuplo : passo);
+
+    if (posDireitaX > 900) {
+      direcaoDireita = "cima";
+      posDireitaY -= passo;
+    }
+  }
+
+  else if (direcaoDireita === "cima") {
+    posDireitaY -= passo;
+
+    if (posDireitaY < -30) {
+      direcaoDireita = "esquerda";
+      posDireitaX -= passo;
+    }
+  }
+
+  else if (direcaoDireita === "esquerda") {
+    posDireitaX -= passo;
+  }
+
+  if (direcaoDireita === "cima" || direcaoDireita === "baixo") {
+  div.style.transform = "rotate(90deg)";
+}
+
   const div = criarDivPeca(peca);
+
+  div.style.position = "absolute";
+  div.style.left = posDireitaX + "px";
+  div.style.top = posDireitaY + "px";
+
   areaMesa.appendChild(div);
 }
 
 function adicionarNaEsquerda(peca) {
+
+  if (primeiraEsquerda) {
+  posEsquerdaX -= 48;
+  primeiraEsquerda = false;
+  } else {
+  posEsquerdaX -= (peca.a === peca.b ? passoDuplo : passo);
+  }
+
+  if (direcaoEsquerda === "esquerda") {
+    posEsquerdaX -= (peca.a === peca.b ? passoDuplo : passo);
+
+    if (posEsquerdaX < 60) {
+      direcaoEsquerda = "baixo";
+      posEsquerdaY += passo;
+    }
+  }
+
+  else if (direcaoEsquerda === "baixo") {
+    posEsquerdaY += passo;
+
+    if (posEsquerdaY > 380) {
+      direcaoEsquerda = "direita";
+      posEsquerdaX += passo;
+    }
+  }
+
+  else if (direcaoEsquerda === "direita") {
+    posEsquerdaX += passo;
+  }
+
+  if (direcaoEsquerda === "cima" || direcaoEsquerda === "baixo") {
+  div.style.transform = "rotate(90deg)";
+}
+
   const div = criarDivPeca(peca);
-  areaMesa.prepend(div);
+
+  div.style.position = "absolute";
+  div.style.left = posEsquerdaX + "px";
+  div.style.top = posEsquerdaY + "px";
+
+  areaMesa.appendChild(div);
 }
 
 function inverterPeca(peca) {
