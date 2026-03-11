@@ -22,20 +22,16 @@ let mostrarPecas = false;
 let centroX = 500;
 let centroY = 220;
 
-let posDireitaX = centroX;
-let posDireitaY = centroY;
-
-let posEsquerdaX = centroX;
-let posEsquerdaY = centroY;
+let posDireita = { x: centroX, y: centroY };
+let posEsquerda = { x: centroX, y: centroY };
 
 let direcaoDireita = "direita";
 let direcaoEsquerda = "esquerda";
 
-let primeiraDireita = true;
-let primeiraEsquerda = true;
+
 
 const passo = 48;
-const passoDuplo = 24;
+
 
 function renderizarMaoReal(id, mao) {
   const container = document.getElementById(id);
@@ -102,6 +98,20 @@ function criarMetade(valor) {
   }
 
   return metade;
+}
+
+function criarDivPeca(peca) {
+
+  const div = document.createElement("div");
+  div.classList.add("peca");
+
+  const metadeA = criarMetade(peca.a);
+  const metadeB = criarMetade(peca.b);
+
+  div.appendChild(metadeA);
+  div.appendChild(metadeB);
+
+  return div;
 }
 
 function criarPecas() {
@@ -191,7 +201,6 @@ function jogarSelecionada(lado) {
     }
 
     adicionarNaEsquerda(peca);
-    proximoTurno();
   }
 
   if (lado === "direita") {
@@ -203,7 +212,7 @@ function jogarSelecionada(lado) {
     }
 
     adicionarNaDireita(peca);
-    proximoTurno();
+    
   }
 
   // Remove da mão
@@ -216,6 +225,8 @@ function jogarSelecionada(lado) {
 
   marcadorEsquerda.style.display = "none";
   marcadorDireita.style.display = "none";
+
+  proximoTurno();
 
   console.log("Esquerda:", extremidadeEsquerda);
   console.log("Direita:", extremidadeDireita);
@@ -330,7 +341,17 @@ function encontrarMaiorDuplo() {
   return { vencedor, indexPeca, valor: maiorDuplo };
 }
 
+function mover(pos, direcao) {
+
+  if (direcao === "direita") pos.x += passo;
+  if (direcao === "esquerda") pos.x -= passo;
+  if (direcao === "cima") pos.y -= passo;
+  if (direcao === "baixo") pos.y += passo;
+
+}
+
 function renderizarMesa(peca) {
+
   const div = criarDivPeca(peca);
 
   div.style.position = "absolute";
@@ -338,6 +359,14 @@ function renderizarMesa(peca) {
   div.style.top = centroY + "px";
 
   areaMesa.appendChild(div);
+
+  // define início das pontas
+  posDireita.x = centroX + passo;
+  posDireita.y = centroY;
+
+  posEsquerda.x = centroX - passo;
+  posEsquerda.y = centroY;
+
 }
 
 function iniciarJogo() {
@@ -354,111 +383,44 @@ function iniciarJogo() {
 
 function adicionarNaDireita(peca) {
 
-  if (primeiraDireita) {
-  posDireitaX += 0;
-  primeiraDireita = false;
-  } else {
-  posDireitaX += (peca.a === peca.b ? passoDuplo : passo);
+  mover(posDireita, direcaoDireita);
+
+  if (posDireita.x > 900 && direcaoDireita === "direita") {
+    direcaoDireita = "cima";
   }
 
-  if (direcaoDireita === "direita") {
-    posDireitaX += (peca.a === peca.b ? passoDuplo : passo);
-
-    if (posDireitaX > 900) {
-      direcaoDireita = "cima";
-      posDireitaY -= passo;
-    }
+  if (posDireita.y < -60 && direcaoDireita === "cima") {
+    direcaoDireita = "esquerda";
   }
-
-  else if (direcaoDireita === "cima") {
-    posDireitaY -= passo;
-
-    if (posDireitaY < -30) {
-      direcaoDireita = "esquerda";
-      posDireitaX -= passo;
-    }
-  }
-
-  else if (direcaoDireita === "esquerda") {
-    posDireitaX -= passo;
-  }
-
-  if (direcaoDireita === "cima" || direcaoDireita === "baixo") {
-  div.style.transform = "rotate(90deg)";
-}
 
   const div = criarDivPeca(peca);
 
   div.style.position = "absolute";
-  div.style.left = posDireitaX + "px";
-  div.style.top = posDireitaY + "px";
+  div.style.left = posDireita.x + "px";
+  div.style.top = posDireita.y + "px";
 
   areaMesa.appendChild(div);
 }
 
 function adicionarNaEsquerda(peca) {
 
-  if (primeiraEsquerda) {
-  posEsquerdaX -= 48;
-  primeiraEsquerda = false;
-  } else {
-  posEsquerdaX -= (peca.a === peca.b ? passoDuplo : passo);
+  mover(posEsquerda, direcaoEsquerda);
+
+  if (posEsquerda.x < 60 && direcaoEsquerda === "esquerda") {
+    direcaoEsquerda = "baixo";
   }
 
-  if (direcaoEsquerda === "esquerda") {
-    posEsquerdaX -= (peca.a === peca.b ? passoDuplo : passo);
-
-    if (posEsquerdaX < 60) {
-      direcaoEsquerda = "baixo";
-      posEsquerdaY += passo;
-    }
+  if (posEsquerda.y > 380 && direcaoEsquerda === "baixo") {
+    direcaoEsquerda = "direita";
   }
-
-  else if (direcaoEsquerda === "baixo") {
-    posEsquerdaY += passo;
-
-    if (posEsquerdaY > 380) {
-      direcaoEsquerda = "direita";
-      posEsquerdaX += passo;
-    }
-  }
-
-  else if (direcaoEsquerda === "direita") {
-    posEsquerdaX += passo;
-  }
-
-  if (direcaoEsquerda === "cima" || direcaoEsquerda === "baixo") {
-  div.style.transform = "rotate(90deg)";
-}
 
   const div = criarDivPeca(peca);
 
   div.style.position = "absolute";
-  div.style.left = posEsquerdaX + "px";
-  div.style.top = posEsquerdaY + "px";
+  div.style.left = posEsquerda.x + "px";
+  div.style.top = posEsquerda.y + "px";
 
   areaMesa.appendChild(div);
-}
-
-function inverterPeca(peca) {
-  [peca.a, peca.b] = [peca.b, peca.a];
-}
-
-function criarDivPeca(peca) {
-  const div = document.createElement("div");
-  div.classList.add("peca");
-
-    if (peca.a === peca.b) {
-    div.classList.add("duplo"); // marca como dobrão
-  }
-
-  const metadeA = criarMetade(peca.a);
-  const metadeB = criarMetade(peca.b);
-
-  div.appendChild(metadeA);
-  div.appendChild(metadeB);
-
-  return div;
 }
 
 marcadorEsquerda.addEventListener("click", () => {
