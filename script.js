@@ -1,23 +1,31 @@
-const mesa = document.getElementById("mesa");
 const areaMesa = document.getElementById("area-mesa");
 const maoJogadorDiv = document.getElementById("mao-jogador");
-
-let maoJogador = [];
-let pecas = [];
-let maoComputador1 = [];
-let maoComputador2 = [];
-let maoComputador3 = [];
-let extremidadeEsquerda = null;
-let extremidadeDireita = null;
-let pecaSelecionada = null;
-let indexSelecionado = null;
-let ordemTurnos = ["jogador", "comp3", "parceiro", "comp1"];
-let turnoAtualIndex = 0;
 
 const marcadorEsquerda = document.getElementById("marcador-esquerda");
 const marcadorDireita = document.getElementById("marcador-direita");
 
+let pecas = [];
+let maoJogador = [];
+let maoComp1 = [];
+let maoComp2 = [];
+let maoComp3 = [];
+
+let extremidadeEsquerda = null;
+let extremidadeDireita = null;
+
+let pecaSelecionada = null;
+let indexSelecionado = null;
+
+let ultimaDireita = null;
+let ultimaEsquerda = null;
+
+let direcaoDireita = "direita";
+let direcaoEsquerda = "esquerda";
+
 let mostrarPecas = false;
+
+let ordemTurnos = ["jogador", "comp3", "parceiro", "comp1"];
+let turnoIndex = 0;
 
 let centroX = 500;
 let centroY = 220;
@@ -25,534 +33,587 @@ let centroY = 220;
 let posDireita = { x: centroX, y: centroY };
 let posEsquerda = { x: centroX, y: centroY };
 
-let direcaoDireita = "direita";
-let direcaoEsquerda = "esquerda";
+const espacamento = 14;
 
 
 
-const passo = 48;
 
-
-function renderizarMaoReal(id, mao) {
-  const container = document.getElementById(id);
-  container.innerHTML = "";
-
-  mao.forEach(peca => {
-    const div = criarDivPeca(peca);
-    container.appendChild(div);
-  });
-}
-
-document.getElementById("toggle-visao").addEventListener("click", () => {
-  mostrarPecas = !mostrarPecas;
-
-  const btn = document.getElementById("toggle-visao");
-  btn.textContent = mostrarPecas
-    ? "Esconder"
-    : "Mostrar";
-
-  atualizarVisao();
-});
-
-function atualizarVisao() {
-  renderizarMao();
-
-  if (mostrarPecas) {
-    renderizarMaoReal("mao-esquerda", maoComputador1);
-    renderizarMaoReal("mao-direita", maoComputador3);
-    renderizarMaoReal("mao-parceiro", maoComputador2);
-  } else {
-    renderizarMaoVerso("mao-esquerda", maoComputador1.length);
-    renderizarMaoVerso("mao-direita", maoComputador3.length);
-    renderizarMaoVerso("mao-parceiro", maoComputador2.length);
-  }
-}
-
-// =============================
-// 1️⃣ Criar todas as peças (0-0 até 6-6)
-// =============================
+/* ---------------- PEÇAS ---------------- */
 
 function criarMetade(valor) {
+
   const metade = document.createElement("div");
   metade.classList.add("metade");
 
-  const posicoes = {
+  const pos = {
     0: [],
     1: [4],
-    2: [0, 8],
-    3: [0, 4, 8],
-    4: [0, 2, 6, 8],
-    5: [0, 2, 4, 6, 8],
-    6: [0, 2, 3, 5, 6, 8],
+    2: [0,8],
+    3: [0,4,8],
+    4: [0,2,6,8],
+    5: [0,2,4,6,8],
+    6: [0,2,3,5,6,8]
   };
 
-  for (let i = 0; i < 9; i++) {
-    if (posicoes[valor].includes(i)) {
-      const ponto = document.createElement("div");
-      ponto.classList.add("ponto");
-      metade.appendChild(ponto);
-    } else {
-      const vazio = document.createElement("div");
-      metade.appendChild(vazio);
+  for(let i=0;i<9;i++){
+
+    if(pos[valor].includes(i)){
+
+      const p=document.createElement("div");
+      p.classList.add("ponto");
+      metade.appendChild(p);
+
+    }else{
+
+      metade.appendChild(document.createElement("div"));
+
     }
+
   }
 
   return metade;
 }
 
-function criarDivPeca(peca) {
+function criarDivPeca(peca){
 
-  const div = document.createElement("div");
+  const div=document.createElement("div");
   div.classList.add("peca");
 
-  const metadeA = criarMetade(peca.a);
-  const metadeB = criarMetade(peca.b);
+  if(peca.a===peca.b){
+    div.classList.add("duplo");
+  }
 
-  div.appendChild(metadeA);
-  div.appendChild(metadeB);
+  div.appendChild(criarMetade(peca.a));
+  div.appendChild(criarMetade(peca.b));
 
   return div;
 }
 
-function criarPecas() {
-  for (let i = 0; i <= 6; i++) {
-    for (let j = i; j <= 6; j++) {
-      pecas.push({ a: i, b: j });
+
+
+/* ---------------- CRIAR PEÇAS ---------------- */
+
+function criarPecas(){
+
+  for(let i=0;i<=6;i++){
+    for(let j=i;j<=6;j++){
+      pecas.push({a:i,b:j});
     }
   }
+
 }
 
-// =============================
-// 2️⃣ Embaralhar (Fisher-Yates)
-// =============================
-function embaralhar(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+function embaralhar(array){
+
+  for(let i=array.length-1;i>0;i--){
+
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+
   }
+
 }
 
-// =============================
-// 3️⃣ Distribuir peças
-// =============================
-function distribuirPecas() {
+function distribuir(){
+
   embaralhar(pecas);
 
-  for (let i = 0; i < 7; i++) {
+  for(let i=0;i<7;i++){
+
     maoJogador.push(pecas.pop());
-    maoComputador1.push(pecas.pop());
-    maoComputador2.push(pecas.pop());
-    maoComputador3.push(pecas.pop());
+    maoComp1.push(pecas.pop());
+    maoComp2.push(pecas.pop());
+    maoComp3.push(pecas.pop());
+
   }
+
 }
 
-function jogadorTemJogada() {
-  return maoJogador.some(peca => 
-    peca.a === extremidadeEsquerda ||
-    peca.b === extremidadeEsquerda ||
-    peca.a === extremidadeDireita ||
-    peca.b === extremidadeDireita
-  );
+function tamanhoPeca(peca){
+
+  if(peca.a === peca.b){
+    return { largura:30, altura:78 }
+  }
+
+  return { largura:80, altura:25 }
+
 }
 
 
-function jogarPeca(index) {
-  const peca = maoJogador[index];
 
-  const combinaEsquerda =
-    peca.a === extremidadeEsquerda ||
-    peca.b === extremidadeEsquerda;
+/* ---------------- RENDER MÃOS ---------------- */
 
-  const combinaDireita =
-    peca.a === extremidadeDireita ||
-    peca.b === extremidadeDireita;
+function renderizarMao(){
 
-  if (!combinaEsquerda && !combinaDireita) {
-    console.log("Peça inválida");
-    return;
-  }
+  maoJogadorDiv.innerHTML="";
 
-  // Guarda peça selecionada
-  pecaSelecionada = peca;
-  indexSelecionado = index;
+  maoJogador.forEach((peca,index)=>{
 
-  // Mostra marcadores válidos
-  if (combinaEsquerda) {
-    marcadorEsquerda.style.display = "block";
-  }
+    const div=criarDivPeca(peca);
 
-  if (combinaDireita) {
-    marcadorDireita.style.display = "block";
-  }
+    div.addEventListener("click",()=>clicarPeca(index));
+
+    maoJogadorDiv.appendChild(div);
+
+  });
+
 }
 
-function jogarSelecionada(lado) {
-  if (!pecaSelecionada) return;
+function renderizarVerso(id,qtd){
 
-  const peca = pecaSelecionada;
-  const index = indexSelecionado;
+  const mao=document.getElementById(id);
 
-  if (lado === "esquerda") {
-    if (peca.b === extremidadeEsquerda) {
-      extremidadeEsquerda = peca.a;
-    } else {
-      inverterPeca(peca);
-      extremidadeEsquerda = peca.a;
-    }
+  mao.innerHTML="";
 
-    adicionarNaEsquerda(peca);
+  for(let i=0;i<qtd;i++){
+
+    const p=document.createElement("div");
+    p.classList.add("peca");
+
+    mao.appendChild(p);
+
   }
 
-  if (lado === "direita") {
-    if (peca.a === extremidadeDireita) {
-      extremidadeDireita = peca.b;
-    } else {
-      inverterPeca(peca);
-      extremidadeDireita = peca.b;
-    }
+}
 
-    adicionarNaDireita(peca);
-    
-  }
+function renderizarReal(id,mao){
 
-  // Remove da mão
-  maoJogador.splice(index, 1);
+  const el=document.getElementById(id);
+  el.innerHTML="";
+
+  mao.forEach(p=>{
+    el.appendChild(criarDivPeca(p));
+  });
+
+}
+
+
+
+/* ---------------- VISÃO ---------------- */
+
+document.getElementById("toggle-visao").addEventListener("click",()=>{
+
+  mostrarPecas=!mostrarPecas;
+
+  atualizarVisao();
+
+});
+
+function atualizarVisao(){
+
   renderizarMao();
 
-  // Limpa seleção
-  pecaSelecionada = null;
-  indexSelecionado = null;
+  if(mostrarPecas){
 
-  marcadorEsquerda.style.display = "none";
-  marcadorDireita.style.display = "none";
+    renderizarReal("mao-esquerda",maoComp1);
+    renderizarReal("mao-direita",maoComp3);
+    renderizarReal("mao-parceiro",maoComp2);
+
+  }else{
+
+    renderizarVerso("mao-esquerda",maoComp1.length);
+    renderizarVerso("mao-direita",maoComp3.length);
+    renderizarVerso("mao-parceiro",maoComp2.length);
+
+  }
+
+}
+
+
+
+/* ---------------- MESA ---------------- */
+
+function mover(pos,dir){
+
+  if(dir==="direita")pos.x+=passo;
+  if(dir==="esquerda")pos.x-=passo;
+  if(dir==="cima")pos.y-=passo;
+  if(dir==="baixo")pos.y+=passo;
+
+}
+
+function colocarCentro(peca){
+
+  const div=criarDivPeca(peca);
+
+  aplicarRotacao(div,"direita");
+
+  div.style.position="absolute";
+  div.style.left=centroX+"px";
+  div.style.top=centroY+"px";
+
+  areaMesa.appendChild(div);
+
+  posDireita.x=centroX;
+  posDireita.y=centroY;
+
+  posEsquerda.x=centroX;
+  posEsquerda.y=centroY;
+
+}
+
+function adicionarDireita(peca){
+
+  calcularDireita(peca);
+
+  const div = criarDivPeca(peca);
+
+  aplicarRotacao(div, direcaoDireita);
+
+  div.style.position="absolute";
+  div.style.left = posDireita.x+"px";
+  div.style.top = posDireita.y+"px";
+
+  areaMesa.appendChild(div);
+
+  ultimaDireita = peca;
+
+}
+
+function adicionarEsquerda(peca){
+
+  calcularEsquerda(peca);
+
+  const div = criarDivPeca(peca);
+
+  aplicarRotacao(div, direcaoEsquerda);
+
+  div.style.position="absolute";
+  div.style.left = posEsquerda.x+"px";
+  div.style.top = posEsquerda.y+"px";
+
+  areaMesa.appendChild(div);
+
+  ultimaEsquerda = peca;
+
+}
+
+
+function calcularDireita(peca){
+
+  const tamAnterior = tamanhoPeca(ultimaDireita);
+
+  if(direcaoDireita === "direita"){
+    posDireita.x += tamAnterior.largura + espacamento;
+
+    if(posDireita.x > 900){
+      direcaoDireita = "cima";
+    }
+  }
+
+  else if(direcaoDireita === "cima"){
+    posDireita.y -= tamAnterior.altura + espacamento;
+
+    if(posDireita.y < 40){
+      direcaoDireita = "esquerda";
+    }
+  }
+
+  else if(direcaoDireita === "esquerda"){
+    posDireita.x -= tamAnterior.largura + espacamento;
+  }
+
+}
+
+function calcularEsquerda(peca){
+
+  const tamAtual = tamanhoPeca(peca);
+
+  if(direcaoEsquerda === "esquerda"){
+    posEsquerda.x -= tamAtual.largura + espacamento;
+
+    if(posEsquerda.x < 60){
+      direcaoEsquerda = "baixo";
+    }
+  }
+
+  else if(direcaoEsquerda === "baixo"){
+    posEsquerda.y += tamAtual.altura + espacamento;
+
+    if(posEsquerda.y > 380){
+      direcaoEsquerda = "direita";
+    }
+  }
+
+  else if(direcaoEsquerda === "direita"){
+    posEsquerda.x += tamAtual.largura + espacamento;
+  }
+
+}
+
+function aplicarRotacao(div, direcao){
+
+  if(direcao === "direita"){
+    div.style.transform = "rotate(0deg)";
+  }
+
+  if(direcao === "cima"){
+    div.style.transform = "rotate(-90deg)";
+  }
+
+  if(direcao === "esquerda"){
+    div.style.transform = "rotate(180deg)";
+  }
+
+  if(direcao === "baixo"){
+    div.style.transform = "rotate(90deg)";
+  }
+
+}
+
+
+
+/* ---------------- JOGADOR ---------------- */
+
+function clicarPeca(index){
+
+  const p=maoJogador[index];
+
+  const esq=(p.a===extremidadeEsquerda||p.b===extremidadeEsquerda);
+  const dir=(p.a===extremidadeDireita||p.b===extremidadeDireita);
+
+  if(!esq && !dir)return;
+
+  pecaSelecionada=p;
+  indexSelecionado=index;
+
+  marcadorEsquerda.style.display=esq?"block":"none";
+  marcadorDireita.style.display=dir?"block":"none";
+
+}
+
+marcadorEsquerda.onclick=()=>jogarSelecionada("esquerda");
+marcadorDireita.onclick=()=>jogarSelecionada("direita");
+
+function inverter(p){
+  [p.a,p.b]=[p.b,p.a];
+}
+
+function jogarSelecionada(lado){
+
+  const p=pecaSelecionada;
+
+  if(!p)return;
+
+  if(lado==="direita"){
+
+    if(p.a===extremidadeDireita){
+      extremidadeDireita=p.b;
+    }else{
+      inverter(p);
+      extremidadeDireita=p.b;
+    }
+
+    adicionarDireita(p);
+
+  }
+
+  if(lado==="esquerda"){
+
+    if(p.b===extremidadeEsquerda){
+      extremidadeEsquerda=p.a;
+    }else{
+      inverter(p);
+      extremidadeEsquerda=p.a;
+    }
+
+    adicionarEsquerda(p);
+
+  }
+
+  maoJogador.splice(indexSelecionado,1);
+
+  marcadorEsquerda.style.display="none";
+  marcadorDireita.style.display="none";
+
+  pecaSelecionada=null;
+
+  atualizarVisao();
 
   proximoTurno();
 
-  console.log("Esquerda:", extremidadeEsquerda);
-  console.log("Direita:", extremidadeDireita);
 }
 
-// =============================
-// 5️⃣ Iniciar jogo
-// =============================
 
-function jogadorAtual() {
-  return ordemTurnos[turnoAtualIndex];
+
+/* ---------------- TURNOS ---------------- */
+
+function jogadorAtual(){
+  return ordemTurnos[turnoIndex];
 }
 
-function proximoTurno() {
-  turnoAtualIndex++;
+function proximoTurno(){
 
-  if (turnoAtualIndex >= ordemTurnos.length) {
-    turnoAtualIndex = 0;
+  turnoIndex++;
+
+  if(turnoIndex>=ordemTurnos.length){
+    turnoIndex=0;
   }
-
-  console.log("Agora é a vez de:", jogadorAtual());
-  atualizarDestaque();
-  executarTurno();
-}
-
-
-function criarPecaVerso() {
-  const peca = document.createElement("div");
-  peca.classList.add("peca");
-
-  // remove qualquer conteúdo interno
-  peca.innerHTML = "";
-
-  return peca;
-}
-
-function renderizarMaoVerso(id, quantidade) {
-  const mao = document.getElementById(id);
-  mao.innerHTML = "";
-
-  for (let i = 0; i < quantidade; i++) {
-    const peca = criarPecaVerso();
-    mao.appendChild(peca);
-  }
-}
-
-renderizarMaoVerso("mao-esquerda", 7);
-renderizarMaoVerso("mao-direita", 7);
-renderizarMaoVerso("mao-parceiro", 7);
-
-
-function renderizarMao() {
-  maoJogadorDiv.innerHTML = "";
-
-  maoJogador.forEach((peca, index) => {
-    const div = criarDivPeca(peca);
-
-    div.addEventListener("click", () => jogarPeca(index));
-
-    maoJogadorDiv.appendChild(div);
-  });
-}
-
-function colocarPrimeiraPeca() {
-  const resultado = encontrarMaiorDuplo();
-
-  if (!resultado.vencedor) {
-    console.log("Nenhum duplo encontrado.");
-    return;
-  }
-
-  const { vencedor, indexPeca } = resultado;
-
-  const primeira = vencedor.mao.splice(indexPeca, 1)[0];
-
-  extremidadeEsquerda = primeira.a;
-  extremidadeDireita = primeira.b;
-
-  renderizarMesa(primeira);
-
-  // Define quem começa (quem jogou a Senona)
-  turnoAtualIndex = ordemTurnos.indexOf(vencedor.nome);
-
-  console.log("Começa:", vencedor.nome);
 
   atualizarDestaque();
   executarTurno();
-}
-
-function encontrarMaiorDuplo() {
-  const jogadores = [
-    { nome: "jogador", mao: maoJogador },
-    { nome: "comp3", mao: maoComputador3 },
-    { nome: "parceiro", mao: maoComputador2 },
-    { nome: "comp1", mao: maoComputador1 }
-  ];
-
-  let maiorDuplo = -1;
-  let vencedor = null;
-  let indexPeca = null;
-
-  jogadores.forEach(jogador => {
-    jogador.mao.forEach((peca, index) => {
-      if (peca.a === peca.b && peca.a > maiorDuplo) {
-        maiorDuplo = peca.a;
-        vencedor = jogador;
-        indexPeca = index;
-      }
-    });
-  });
-
-  return { vencedor, indexPeca, valor: maiorDuplo };
-}
-
-function mover(pos, direcao) {
-
-  if (direcao === "direita") pos.x += passo;
-  if (direcao === "esquerda") pos.x -= passo;
-  if (direcao === "cima") pos.y -= passo;
-  if (direcao === "baixo") pos.y += passo;
 
 }
 
-function renderizarMesa(peca) {
+function atualizarDestaque(){
 
-  const div = criarDivPeca(peca);
+  document.querySelectorAll(
+    ".area-jogador,.area-adversario,.area-parceiro"
+  ).forEach(e=>e.classList.remove("ativo"));
 
-  div.style.position = "absolute";
-  div.style.left = centroX + "px";
-  div.style.top = centroY + "px";
+  const j=jogadorAtual();
 
-  areaMesa.appendChild(div);
-
-  // define início das pontas
-  posDireita.x = centroX + passo;
-  posDireita.y = centroY;
-
-  posEsquerda.x = centroX - passo;
-  posEsquerda.y = centroY;
+  if(j==="jogador")document.querySelector(".area-jogador").classList.add("ativo");
+  if(j==="comp1")document.querySelector(".area-adversario.esquerda").classList.add("ativo");
+  if(j==="comp3")document.querySelector(".area-adversario.direita").classList.add("ativo");
+  if(j==="parceiro")document.querySelector(".area-parceiro").classList.add("ativo");
 
 }
 
-function iniciarJogo() {
-  criarPecas();
-  distribuirPecas();
 
-  colocarPrimeiraPeca(); 
 
-  atualizarVisao(); 
+/* ---------------- IA ---------------- */
 
-  console.log("Extremidade esquerda:", extremidadeEsquerda);
-  console.log("Extremidade direita:", extremidadeDireita);
-}
+function jogarIA(mao){
 
-function adicionarNaDireita(peca) {
+  for(let i=0;i<mao.length;i++){
 
-  mover(posDireita, direcaoDireita);
+    const p=mao[i];
 
-  if (posDireita.x > 900 && direcaoDireita === "direita") {
-    direcaoDireita = "cima";
+    if(p.a===extremidadeDireita||p.b===extremidadeDireita){
+
+      if(p.a!==extremidadeDireita)inverter(p);
+
+      extremidadeDireita=p.b;
+
+      adicionarDireita(p);
+
+      mao.splice(i,1);
+
+      return true;
+
+    }
+
+    if(p.a===extremidadeEsquerda||p.b===extremidadeEsquerda){
+
+      if(p.b!==extremidadeEsquerda)inverter(p);
+
+      extremidadeEsquerda=p.a;
+
+      adicionarEsquerda(p);
+
+      mao.splice(i,1);
+
+      return true;
+
+    }
+
   }
 
-  if (posDireita.y < -60 && direcaoDireita === "cima") {
-    direcaoDireita = "esquerda";
-  }
+  return false;
 
-  const div = criarDivPeca(peca);
-
-  div.style.position = "absolute";
-  div.style.left = posDireita.x + "px";
-  div.style.top = posDireita.y + "px";
-
-  areaMesa.appendChild(div);
 }
 
-function adicionarNaEsquerda(peca) {
 
-  mover(posEsquerda, direcaoEsquerda);
 
-  if (posEsquerda.x < 60 && direcaoEsquerda === "esquerda") {
-    direcaoEsquerda = "baixo";
-  }
+/* ---------------- EXECUTAR TURNO ---------------- */
 
-  if (posEsquerda.y > 380 && direcaoEsquerda === "baixo") {
-    direcaoEsquerda = "direita";
-  }
+function executarTurno(){
 
-  const div = criarDivPeca(peca);
+  const j=jogadorAtual();
 
-  div.style.position = "absolute";
-  div.style.left = posEsquerda.x + "px";
-  div.style.top = posEsquerda.y + "px";
+  if(j==="jogador"){
 
-  areaMesa.appendChild(div);
-}
-
-marcadorEsquerda.addEventListener("click", () => {
-  jogarSelecionada("esquerda");
-});
-
-marcadorDireita.addEventListener("click", () => {
-  jogarSelecionada("direita");
-
-  
-});
-
-function executarTurno() {
-  const atual = jogadorAtual();
-
- if (atual === "jogador") {
-
-  if (!jogadorTemJogada()) {
-    console.log("Jogador passou a vez.");
-    mostrarPassou("jogador");
-
-    setTimeout(() => {
-      proximoTurno();
-    }, 800);
+    if(!maoJogador.some(p=>
+      p.a===extremidadeDireita||
+      p.b===extremidadeDireita||
+      p.a===extremidadeEsquerda||
+      p.b===extremidadeEsquerda
+    )){
+      setTimeout(proximoTurno,800);
+    }
 
     return;
   }
-
-    return; // espera clique
-  }
-
-  console.log("Turno do", atual);
 
   let mao;
 
-  if (atual === "comp1") mao = maoComputador1;
-  if (atual === "comp3") mao = maoComputador3;
-  if (atual === "parceiro") mao = maoComputador2;
+  if(j==="comp1")mao=maoComp1;
+  if(j==="comp3")mao=maoComp3;
+  if(j==="parceiro")mao=maoComp2;
 
-  setTimeout(() => {
-    jogarComputador(mao);
+  setTimeout(()=>{
+
+    jogarIA(mao);
+
+    atualizarVisao();
+
     proximoTurno();
-  }, 800);
+
+  },700);
+
 }
 
-function atualizarDestaque() {
 
-  document.querySelectorAll(
-    ".area-jogador, .area-adversario, .area-parceiro"
-  ).forEach(el => el.classList.remove("ativo"));
 
-  const atual = jogadorAtual();
+/* ---------------- SENONA ---------------- */
 
-  if (atual === "jogador") {
-    document.querySelector(".area-jogador").classList.add("ativo");
-  }
+function iniciarMesa(){
 
-  if (atual === "comp1") {
-    document.querySelector(".area-adversario.esquerda").classList.add("ativo");
-  }
+  const todos=[
+    {nome:"jogador",mao:maoJogador},
+    {nome:"comp1",mao:maoComp1},
+    {nome:"comp3",mao:maoComp3},
+    {nome:"parceiro",mao:maoComp2}
+  ];
 
-  if (atual === "comp3") {
-    document.querySelector(".area-adversario.direita").classList.add("ativo");
-  }
+  let maior=-1;
+  let vencedor=null;
+  let idx=null;
 
-  if (atual === "parceiro") {
-    document.querySelector(".area-parceiro").classList.add("ativo");
-  }
-}
+  todos.forEach(j=>{
 
-//IA jogando
+    j.mao.forEach((p,i)=>{
 
-function jogarComputador(mao) {
-
-  for (let i = 0; i < mao.length; i++) {
-
-    const peca = mao[i];
-
-    const combinaEsquerda =
-      peca.a === extremidadeEsquerda ||
-      peca.b === extremidadeEsquerda;
-
-    const combinaDireita =
-      peca.a === extremidadeDireita ||
-      peca.b === extremidadeDireita;
-
-    if (combinaEsquerda) {
-
-      if (peca.b === extremidadeEsquerda) {
-        extremidadeEsquerda = peca.a;
-      } else {
-        inverterPeca(peca);
-        extremidadeEsquerda = peca.a;
+      if(p.a===p.b && p.a>maior){
+        maior=p.a;
+        vencedor=j;
+        idx=i;
       }
 
-      adicionarNaEsquerda(peca);
-      mao.splice(i, 1);
-      return;
-    }
+    });
 
-    if (combinaDireita) {
+  });
 
-      if (peca.a === extremidadeDireita) {
-        extremidadeDireita = peca.b;
-      } else {
-        inverterPeca(peca);
-        extremidadeDireita = peca.b;
-      }
+  const p=vencedor.mao.splice(idx,1)[0];
 
-      adicionarNaDireita(peca);
-      mao.splice(i, 1);
-      return;
-    }
-  }
+  extremidadeEsquerda=p.a;
+  extremidadeDireita=p.b;
 
-  console.log("Computador passou a vez.");
-  mostrarPassou(jogadorAtual());
+  colocarCentro(p);
+
+  ultimaDireita = p;
+  ultimaEsquerda = p;
+
+  turnoIndex=ordemTurnos.indexOf(vencedor.nome);
+
 }
 
-function mostrarPassou(nome) {
 
-  const status = document.getElementById("status-" + nome);
 
-  if (!status) return;
+/* ---------------- INICIO ---------------- */
 
-  status.textContent = "Passou";
-  status.classList.add("passou");
+function iniciar(){
 
-  setTimeout(() => {
-    status.textContent = "";
-    status.classList.remove("passou");
-  }, 1500);
+  criarPecas();
+  distribuir();
+
+  iniciarMesa();
+
+  atualizarVisao();
+
+  proximoTurno();
+
 }
 
-iniciarJogo();
+iniciar();
